@@ -32,8 +32,9 @@ sub genCookie
 sub genUA
 {
     my $ua = LWP::UserAgent->new;
-    $ua->proxy(['http'], 'http://proxy.hinet.net:80/');
+    $ua->agent('Mozilla/5.0');
     $ua->cookie_jar(genCookie());
+    $ua->proxy(['http'], 'http://proxy.hinet.net:80/');
 
     return $ua;
 }
@@ -59,7 +60,6 @@ sub grubUser
 
     for (;;) {
 	my $res = $ua->get($url);
-	DEBUG "test";
 	last if !$res->is_success;
 
 	my $body = $res->content;
