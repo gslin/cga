@@ -59,6 +59,7 @@ sub grubUser
 
     for (;;) {
 	my $res = $ua->get($url);
+	DEBUG "test";
 	last if !$res->is_success;
 
 	my $body = $res->content;
@@ -67,8 +68,11 @@ sub grubUser
 	parseFriendList($body);
 	parseAlbums($url, $body);
 
-	my $html = Object::Destroyer->new(HTML::TreeBuilder->new_from_content($body), 'delete');
+	my $html = HTML::TreeBuilder->new_from_content($body);
+	my $htmlD = Object::Destroyer->new($html, 'delete');
+
 	my $nextElement = $html->look_down('id', 'next') or last;
+
 	$url = $url->new_abs($nextElement->attr('href'), $url);
 	$nextElement->delete;
     }
@@ -148,7 +152,8 @@ sub parseAlbum
     my $body = shift;
     my $url = shift;
 
-    my $html = Object::Destroyer->new(HTML::TreeBuilder->new_from_content($body), 'delete');
+    my $html = HTML::TreeBuilder->new_from_content($body);
+    my $htmlD = Object::Destroyer->new($html, 'delete');
 
     my $hit = 0;
     my $k;
@@ -183,17 +188,18 @@ sub parseAlbums
     my $url = URI->new(shift);
     my $body = shift;
 
-    my $html = Object::Destroyer->new(HTML::TreeBuilder->new_from_content($body), 'delete');
+    my $html = HTML::TreeBuilder->new_from_content($body);
+    my $htmlD = Object::Destroyer->new($html, 'delete');
 
     foreach my $albumElement ($html->look_down('class', 'side')) {
-	$albumElement = Object::Destroyer->new($albumElement, 'delete');
+	my $albumElementD = Object::Destroyer->new($albumElement, 'delete');
 
 	my $albumLink = $albumElement->look_down('_tag', 'a');
 	next if !defined $albumLink;
-	$albumLink = Object::Destroyer->new($albumLink, 'delete');
 
 	my $newurl = $url->new_abs($albumLink->attr('href'), $url);
 	$albumQueue->put($newurl);
+	$albumLink->delete;
     }
 }
 
@@ -203,13 +209,14 @@ sub parseFriendList
 
     my $body = shift;
 
-    my $html = Object::Destroyer->new(HTML::TreeBuilder->new_from_content($body), 'delete');
+    my $html = HTML::TreeBuilder->new_from_content($body);
+    my $htmlD = Object::Destroyer->new($html, 'delete');
+
     my $friendList = $html->look_down('id', 'friendlist') or return;
-    DEBUG "test";
-    $friendList = Object::Destroyer->new($friendList);
+    my $friendListD = Object::Destroyer->new($friendList, 'delete');
 
     foreach my $opt ($friendList->look_down('_tag', 'option')) {
-	$opt = Object::Destroyer->new($opt, 'delete');
+	my $optD = Object::Destroyer->new($opt, 'delete');
 	my $v = $opt->attr('value');
 
 	next if !defined $v;
