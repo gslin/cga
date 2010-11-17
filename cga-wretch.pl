@@ -9,6 +9,7 @@ use Coro::Timer qw/sleep/;
 use Getopt::Std;
 use HTML::TreeBuilder;
 use HTTP::Cookies;
+use HTTP::Headers;
 use JobQueue;
 use LWP::UserAgent;
 use Log::Log4perl qw/:easy/;
@@ -17,24 +18,43 @@ use URI;
 use strict;
 use warnings;
 
-use constant SITEBASE => 'http://www.wretch.cc';
+use constant SITEBASE => 'http://www.wretch.cc.nyud.net';
 
 main();
 
 sub genCookie
 {
     my $cookie = HTTP::Cookies->new;
-    $cookie->set_cookie(1, 'showall', '1', '/album/', 'www.wretch.cc');
+    $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc');
+    $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc.nyud.net');
+
+    # Random cookie
+    #$cookie->set_cookie(0, 'BX', '', '/', '.wretch.cc');
 
     return $cookie;
+}
+
+sub genHeader
+{
+    my $h = HTTP::Headers->new;
+
+    $h->header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+    $h->header('Accept-Charset', 'UTF-8,*');
+    $h->header('Accept-Encoding', 'gzip,deflate');
+    $h->header('Accept-Language', 'zh-tw,en-us;q=0.7,en;q=0.3');
+
+    return $h;
 }
 
 sub genUA
 {
     my $ua = LWP::UserAgent->new;
-    $ua->agent('Mozilla/5.0');
-    $ua->cookie_jar(genCookie());
     $ua->proxy(['http'], 'http://proxy.hinet.net:80/');
+
+    $ua->default_headers(genHeader());
+
+    $ua->agent('Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-TW; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12');
+    $ua->cookie_jar(genCookie());
 
     return $ua;
 }
@@ -44,6 +64,8 @@ sub grubAlbum
     my $url = shift;
 
     my $res = genUA()->get($url);
+    DEBUG sprintf "Receiving %s code %d", $url, $res->code;
+
     return if !$res->is_success;
 
     my $body = $res->content;
@@ -60,6 +82,8 @@ sub grubUser
 
     for (;;) {
 	my $res = $ua->get($url);
+	DEBUG sprintf "Receiving %s code %d", $url, $res->code;
+
 	last if !$res->is_success;
 
 	my $body = $res->content;
@@ -136,6 +160,8 @@ sub main
     use vars qw/$albumQueue $userQueue/;
     initParams();
 
+    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
+
     $albumQueue = JobQueue->new;
     $userQueue = JobQueue->new;
 
@@ -197,6 +223,7 @@ sub parseAlbums
 	my $albumLink = $albumElement->look_down('_tag', 'a');
 	next if !defined $albumLink;
 
+	# TODO 用 AnyEvent 改寫
 	my $newurl = $url->new_abs($albumLink->attr('href'), $url);
 	$albumQueue->put($newurl);
 	$albumLink->delete;
