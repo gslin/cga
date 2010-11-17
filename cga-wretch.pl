@@ -28,7 +28,7 @@ sub genCookie
     $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc');
     $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc.nyud.net');
 
-    # Random cookie
+    # TODO Random cookie
     #$cookie->set_cookie(0, 'BX', '', '/', '.wretch.cc');
 
     return $cookie;
