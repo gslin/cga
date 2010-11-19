@@ -19,7 +19,7 @@ use URI;
 use strict;
 use warnings;
 
-use constant SITEBASE => 'http://www.wretch.cc.nyud.net';
+use constant SITEBASE => 'http://www.wretch.cc';
 
 main();
 
