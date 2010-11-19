@@ -7,6 +7,7 @@ use Coro;
 use Coro::EV;
 use Coro::LWP;
 use Coro::Timer qw/sleep/;
+use Encode;
 use Getopt::Std;
 use HTML::TreeBuilder;
 use HTTP::Headers;
@@ -55,12 +56,52 @@ sub grubAlbum
     my $body = $res->content;
     DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
 
-    parseAlbum($body, $url);
+    # 轉成 UTF-8
+    Encode::from_to($body, 'big5', 'utf8');
+
+    # FIXME
+    #parseAlbum($body, $url);
+}
+
+sub grubFriendList
+{
+    my $username = lc shift;
+    my $url = URI->new(SITEBASE . "/shin_friend_list.html?nickname=$username");
+
+    my $ua = genUA();
+
+    for (;;) {
+	my $res = $ua->get($url);
+	DEBUG sprintf "Receiving %s code %d", $url, $res->code;
+
+	return if !$res->is_success;
+
+	my $body = $res->content;
+	DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
+
+	# 轉成 UTF-8
+	Encode::from_to($body, 'big5', 'utf8');
+
+	parseFriendList($body);
+
+	my $html = HTML::TreeBuilder->new_from_content($body);
+	my $htmlD = Object::Destroyer->new($html, 'delete');
+
+	my $nextElement = $html->look_down('_tag', 'a', sub {
+		$_[0]->as_text =~ /^下一頁/;
+	    }) or last;
+	$url = $url->new_abs($nextElement->attr('href'), $url);
+	$nextElement->delete;
+    }
 }
 
 sub grubUser
 {
-    my $url = URI->new(shift);
+    my $username = lc shift;
+
+    grubFriendList($username);
+
+    my $url = URI->new(SITEBASE . "/$username");
 
     my $ua = genUA();
 
@@ -73,7 +114,9 @@ sub grubUser
 	my $body = $res->content;
 	DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
 
-	parseFriendList($body);
+	# 轉成 UTF-8
+	Encode::from_to($body, 'big5', 'utf8');
+
 	parseAlbums($url, $body);
 
 	my $html = HTML::TreeBuilder->new_from_content($body);
@@ -96,10 +139,9 @@ sub grubWorker
 	    my $username = $userQueue->get or return;
 	    $username = lc $username;
 
-	    my $url = SITEBASE . "/$username";
 	    DEBUG sprintf 'userQueue working %s (%d available)', $username, $userQueue->length;
 
-	    grubUser($url);
+	    grubUser($username);
 	    cede;
 	}
     };
@@ -138,14 +180,14 @@ sub initParams
     } else {
 	Log::Log4perl->easy_init($WARN);
     }
+
+    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
 }
 
 sub main
 {
     use vars qw/$albumQueue $userQueue/;
     initParams();
-
-    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
 
     $albumQueue = JobQueue->new;
     $userQueue = JobQueue->new;
@@ -156,6 +198,34 @@ sub main
     grubWorker();
 
     schedule;
+}
+
+sub parseAlbums
+{
+    my $url = shift;
+    my $body = shift;
+}
+
+sub parseFriendList
+{
+    use vars qw/$userQueue/;
+
+    my $body = shift;
+
+    my $html = HTML::TreeBuilder->new_from_content($body);
+    my $htmlD = Object::Destroyer->new($html, 'delete');
+
+    foreach my $fa ($html->look_down('id', 'fa')) {
+	my $faD = Object::Destroyer->new($fa, 'delete');
+
+	foreach my $friendElement ($fa->look_down('_tag', 'div', 'class', 'tit')) {
+	    my $friendElementD = Object::Destroyer->new($friendElement, 'delete');
+
+	    my $username = lc $friendElement->as_text;
+	    $userQueue->put($username);
+	    DEBUG "Find friend $username";
+	}
+    }
 }
 
 __END__
