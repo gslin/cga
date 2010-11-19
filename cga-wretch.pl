@@ -41,7 +41,6 @@ sub genHeader
 
     $h->header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
     $h->header('Accept-Charset', 'UTF-8,*');
-    $h->header('Accept-Encoding', 'gzip,deflate');
     $h->header('Accept-Language', 'zh-tw,en-us;q=0.7,en;q=0.3');
 
     return $h;
