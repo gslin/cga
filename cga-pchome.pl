@@ -122,9 +122,9 @@ sub grubUser
 	my $html = HTML::TreeBuilder->new_from_content($body);
 	my $htmlD = Object::Destroyer->new($html, 'delete');
 
-	# FIXME
-	my $nextElement = $html->look_down('id', 'next') or last;
-
+	my $nextElement = $html->look_down('_tag', 'a', sub {
+		$_[0]->as_text =~ /^下一頁/;
+	    }) or last;
 	$url = $url->new_abs($nextElement->attr('href'), $url);
 	$nextElement->delete;
     }
@@ -221,7 +221,10 @@ sub parseFriendList
 	foreach my $friendElement ($fa->look_down('_tag', 'div', 'class', 'tit')) {
 	    my $friendElementD = Object::Destroyer->new($friendElement, 'delete');
 
-	    my $username = lc $friendElement->as_text;
+	    my $friendLink = $friendElement->look_down('_tag', 'a');
+	    my $friendLinkE = Object::Destroyer->new($friendLink, 'delete');
+
+	    my $username = lc substr $friendLink->attr('href'), 1;
 	    $userQueue->put($username);
 	    DEBUG "Find friend $username";
 	}
