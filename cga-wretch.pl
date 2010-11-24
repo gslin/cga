@@ -223,7 +223,6 @@ sub parseAlbums
 	my $albumLink = $albumElement->look_down('_tag', 'a');
 	next if !defined $albumLink;
 
-	# TODO 用 AnyEvent 改寫
 	my $newurl = $url->new_abs($albumLink->attr('href'), $url);
 	$albumQueue->put($newurl);
 	$albumLink->delete;
