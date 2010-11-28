@@ -3,25 +3,21 @@ package JobQueue;
 use strict;
 use warnings;
 
-sub get
-{
+sub get {
     my $self = shift;
     return shift @{$self->{jqa}};
 }
 
-sub length
-{
+sub length {
     my $self = shift;
     return scalar @{$self->{jqa}};
 }
 
-sub new
-{
+sub new {
     bless {jq => {}, jqa => []};
 }
 
-sub put
-{
+sub put {
     my $self = shift;
     my $id = shift;
 

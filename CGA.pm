@@ -3,8 +3,7 @@ package CGA;
 use strict;
 use warnings;
 
-sub parseKeyword
-{
+sub parseKeyword {
     my $str = shift;
 
     return 1 if $str =~ /(?:海|洋|岸|北|中|南|東).*巡/;
