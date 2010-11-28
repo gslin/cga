@@ -23,8 +23,7 @@ use constant SITEBASE => 'http://photo.pchome.com.tw';
 
 main();
 
-sub genHeader
-{
+sub genHeader {
     my $h = HTTP::Headers->new;
 
     $h->header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
@@ -34,8 +33,7 @@ sub genHeader
     return $h;
 }
 
-sub genUA
-{
+sub genUA {
     my $ua = LWP::UserAgent->new;
 
     $ua->default_headers(genHeader());
@@ -44,8 +42,7 @@ sub genUA
     return $ua;
 }
 
-sub grubAlbum
-{
+sub grubAlbum {
     my $url = shift;
 
     my $res = genUA()->get($url);
@@ -63,8 +60,7 @@ sub grubAlbum
     #parseAlbum($body, $url);
 }
 
-sub grubFriendList
-{
+sub grubFriendList {
     my $username = lc shift;
     my $url = URI->new(SITEBASE . "/shin_friend_list.html?nickname=$username");
 
@@ -95,8 +91,7 @@ sub grubFriendList
     }
 }
 
-sub grubUser
-{
+sub grubUser {
     my $username = lc shift;
 
     grubFriendList($username);
@@ -130,8 +125,7 @@ sub grubUser
     }
 }
 
-sub grubWorker
-{
+sub grubWorker {
     use vars qw/$albumQueue $userQueue/;
 
     async {
@@ -162,8 +156,7 @@ sub grubWorker
     };
 }
 
-sub initParams
-{
+sub initParams {
     my %args;
     my $debug = 0;
     my $verbose = 0;
@@ -184,8 +177,7 @@ sub initParams
     push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
 }
 
-sub main
-{
+sub main {
     use vars qw/$albumQueue $userQueue/;
     initParams();
 
@@ -200,14 +192,12 @@ sub main
     schedule;
 }
 
-sub parseAlbums
-{
+sub parseAlbums {
     my $url = shift;
     my $body = shift;
 }
 
-sub parseFriendList
-{
+sub parseFriendList {
     use vars qw/$userQueue/;
 
     my $body = shift;

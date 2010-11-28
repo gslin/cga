@@ -18,16 +18,14 @@ use constant SITEBASE => 'http://www.wretch.cc';
 
 main();
 
-sub genCookie
-{
+sub genCookie {
     my $cookie = HTTP::Cookies->new;
     $cookie->set_cookie(1, 'showall', '1', '/album/', 'www.wretch.cc');
 
     return $cookie;
 }
 
-sub getURL
-{
+sub getURL {
     use vars qw/$ua/;
 
     my $url = shift;
@@ -47,8 +45,7 @@ sub getURL
     return $res->content;
 }
 
-sub grubUsername
-{
+sub grubUsername {
     state %cacheUsername;
     use vars qw/$q/;
 
@@ -105,8 +102,7 @@ sub grubUsername
     }
 }
 
-sub initLog
-{
+sub initLog {
     use vars qw/$debug $log $verbose/;
 
     if ($debug > 0) {
@@ -118,8 +114,7 @@ sub initLog
     }
 }
 
-sub initParams
-{
+sub initParams {
     use vars qw/$debug $proxy $verbose/;
 
     my %args;
@@ -134,8 +129,7 @@ sub initParams
     $verbose = 1 if 'v' ~~ %args;
 }
 
-sub initUA
-{
+sub initUA {
     use vars qw/$proxy $ua/;
 
     $ua = LWP::UserAgent->new;
@@ -144,8 +138,7 @@ sub initUA
     $ua->cookie_jar(genCookie());
 }
 
-sub main
-{
+sub main {
     use vars qw/$q/;
 
     initParams();

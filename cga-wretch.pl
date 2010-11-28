@@ -23,8 +23,7 @@ use constant SITEBASE => 'http://www.wretch.cc.nyud.net';
 
 main();
 
-sub genCookie
-{
+sub genCookie {
     my $cookie = HTTP::Cookies->new;
     $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc');
     $cookie->set_cookie(0, 'showall', '1', '/album/', 'www.wretch.cc.nyud.net');
@@ -35,8 +34,7 @@ sub genCookie
     return $cookie;
 }
 
-sub genHeader
-{
+sub genHeader {
     my $h = HTTP::Headers->new;
 
     $h->header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
@@ -46,8 +44,7 @@ sub genHeader
     return $h;
 }
 
-sub genUA
-{
+sub genUA {
     my $ua = LWP::UserAgent->new;
     $ua->proxy(['http'], 'http://proxy.hinet.net:80/');
 
@@ -59,8 +56,7 @@ sub genUA
     return $ua;
 }
 
-sub grubAlbum
-{
+sub grubAlbum {
     my $url = shift;
 
     my $res = genUA()->get($url);
@@ -74,8 +70,7 @@ sub grubAlbum
     parseAlbum($body, $url);
 }
 
-sub grubUser
-{
+sub grubUser {
     my $url = URI->new(shift);
 
     my $ua = genUA();
@@ -102,8 +97,7 @@ sub grubUser
     }
 }
 
-sub grubWorker
-{
+sub grubWorker {
     use vars qw/$albumQueue $userQueue/;
 
     async {
@@ -135,8 +129,7 @@ sub grubWorker
     };
 }
 
-sub initParams
-{
+sub initParams {
     my %args;
     my $debug = 0;
     my $verbose = 0;
@@ -155,8 +148,7 @@ sub initParams
     }
 }
 
-sub main
-{
+sub main {
     use vars qw/$albumQueue $userQueue/;
     initParams();
 
@@ -173,8 +165,7 @@ sub main
     schedule;
 }
 
-sub parseAlbum
-{
+sub parseAlbum {
     my $body = shift;
     my $url = shift;
 
@@ -207,8 +198,7 @@ sub parseAlbum
     WARN sprintf "Hit url %s - %s", $url, $k if $hit > 0;
 }
 
-sub parseAlbums
-{
+sub parseAlbums {
     use vars qw/$albumQueue/;
 
     my $url = URI->new(shift);
@@ -229,8 +219,7 @@ sub parseAlbums
     }
 }
 
-sub parseFriendList
-{
+sub parseFriendList {
     use vars qw/$userQueue/;
 
     my $body = shift;
