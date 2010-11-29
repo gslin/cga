@@ -15,6 +15,9 @@ use warnings;
 
 main();
 
+sub grubWorker {
+}
+
 sub initParams {
     my %args;
     my $debug = 0;
@@ -35,7 +38,20 @@ sub initParams {
 }
 
 sub main {
+    use vars qw/$albumQueue $userQueue/;
     initParams();
+
+    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
+
+    $albumQueue = JobQueue->new;
+    $userQueue = JobQueue->new;
+
+    my $username = shift @ARGV or croak 'Lack of username';
+    $userQueue->put(lc $username);
+
+    grubWorker();
+
+    schedule;
 }
 
 __END__
