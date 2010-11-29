@@ -27,7 +27,7 @@ sub new {
     my $self = shift;
     my $filename = shift;
 
-    bless {}, $self;
+    $self = bless {};
 
     if (defined $filename) {
 	my %hash;
