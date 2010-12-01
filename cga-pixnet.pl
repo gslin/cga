@@ -87,6 +87,22 @@ sub grubWorker {
 	    cede;
 	}
     };
+
+    async {
+	for (;;) {
+	    my $v = $albumQueue->get;
+	    if (!defined $v) {
+		sleep 1;
+		next;
+	    }
+
+	    my ($username, $id) = @$v;
+	    DEBUG sprintf 'albumQueue working on %s/%s (%d available)', $username, $id, $albumQueue->length;
+
+	    grubAlbum($username, $id);
+	    cede;
+	}
+    };
 }
 
 sub initParams {
