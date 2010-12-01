@@ -50,6 +50,9 @@ sub genUA {
     return $ua;
 }
 
+sub grubAlbum {
+}
+
 sub grubUser {
     my $username = shift;
 
