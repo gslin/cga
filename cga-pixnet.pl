@@ -40,6 +40,7 @@ sub genHeader {
 
 sub genUA {
     my $ua = LWP::UserAgent->new;
+    $ua->proxy(['http'], 'http://proxy.hinet.net:80/');
 
     $ua->default_headers(genHeader());
 
