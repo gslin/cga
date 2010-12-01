@@ -114,8 +114,8 @@ sub main {
 
     push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
 
-    $albumQueue = JobQueue->new;
-    $userQueue = JobQueue->new;
+    $albumQueue = JobQueue->new(glob '~/data/pixnet.albumqueue');
+    $userQueue = JobQueue->new(glob '~/data/pixnet.userqueue');
 
     my $username = shift @ARGV or croak 'Lack of username';
     $userQueue->put(lc $username);
