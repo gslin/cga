@@ -154,8 +154,8 @@ sub main {
 
     push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, SendTE => 0);
 
-    $albumQueue = JobQueue->new;
-    $userQueue = JobQueue->new;
+    $albumQueue = JobQueue->new(glob '~/data/wretch.albumqueue');
+    $userQueue = JobQueue->new(glob '~/data/wretch.userqueue');
 
     my $username = shift @ARGV or croak 'Lack of username';
     $userQueue->put(lc $username);
