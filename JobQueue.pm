@@ -15,7 +15,7 @@ sub DESTROY {
 
 sub get {
     my $self = shift;
-    return shift @{$self->{jqa}};
+    return pop @{$self->{jqa}};
 }
 
 sub length {
