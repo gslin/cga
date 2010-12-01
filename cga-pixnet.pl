@@ -51,6 +51,7 @@ sub genUA {
 }
 
 sub grubAlbum {
+    use vars qw/$albumQueue/;
 }
 
 sub grubUser {
