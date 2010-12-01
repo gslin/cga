@@ -15,6 +15,7 @@ use JobQueue;
 use LWP::UserAgent;
 use Log::Log4perl qw/:easy/;
 use Object::Destroyer;
+use URI;
 use strict;
 use warnings;
 
