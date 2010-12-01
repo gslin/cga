@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    eval { use NDBM_File; };
+    eval { use DBM::Deep; };
 }
 
 sub DESTROY {
@@ -30,13 +30,11 @@ sub new {
     $self = bless {};
 
     if (defined $filename) {
-	my %hash;
-	tie %hash, 'NDBM_File', $filename, 1, 0;
+	my $a = DBM::Deep->new(file => "$filename.a", type => DBM::Deep->TYPE_ARRAY);
+	my $h = DBM::Deep->new(file => "$filename.h", type => DBM::Deep->TYPE_HASH);
 
-	$self->{h} = \%hash;
-
-	$self->{jq} = $hash{jq} = {};
-	$self->{jqa} = $hash{jqa} = [];
+	$self->{jq} = $h;
+	$self->{jqa} = $a;
     } else {
 	$self->{jq} = {};
 	$self->{jqa} = [];
@@ -52,7 +50,7 @@ sub put {
     return if defined $self->{jq}->{$id};
 
     $self->{jq}->{$id} = 0;
-    push @{$self->{jqa}}, $id;
+    push @{$self->{jqa}}, "$id";
 }
 
 1;
