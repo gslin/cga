@@ -63,7 +63,7 @@ sub grubUser {
     my $url = URI->new("http://$username.pixnet.net.nyud.net/friend/listmore");
 
     for (;;) {
-	my $res = $ua->get($url);
+	my $res = $ua->get($url, 'X-Requested-With' => 'XMLHttpRequest');
 	DEBUG sprintf "Receiving %s code %d", $url, $res->code;
 
 	last if !$res->is_success;
