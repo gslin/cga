@@ -62,12 +62,14 @@ sub grubAlbum {
     my $res = genUA()->get($url);
     DEBUG sprintf "Receiving %s code %d", $url, $res->code;
 
-    return if !$res->is_success;
+    return -1 if !$res->is_success;
 
     my $body = $res->content;
     DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
 
     parseAlbum($body, $url);
+
+    return 0;
 }
 
 sub grubUser {
@@ -79,7 +81,7 @@ sub grubUser {
 	my $res = $ua->get($url);
 	DEBUG sprintf "Receiving %s code %d", $url, $res->code;
 
-	last if !$res->is_success;
+	return -1 if !$res->is_success;
 
 	my $body = $res->content;
 	DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
@@ -95,6 +97,8 @@ sub grubUser {
 	$url = $url->new_abs($nextElement->attr('href'), $url);
 	$nextElement->delete;
     }
+
+    return 0;
 }
 
 sub grubWorker {
@@ -108,7 +112,7 @@ sub grubWorker {
 	    my $url = SITEBASE . "/album/$username";
 	    DEBUG sprintf 'userQueue working %s (%d available)', $username, $userQueue->length;
 
-	    grubUser($url);
+	    $userQueue->reput($username) if 0 > grubUser($url);
 	    cede;
 	}
     };
@@ -123,7 +127,7 @@ sub grubWorker {
 
 	    DEBUG sprintf 'albumQueue working on %s (%d available)', $albumUrl, $albumQueue->length;
 
-	    grubAlbum($albumUrl);
+	    $albumQueue->reput($albumUrl) if 0 > grubAlbum($albumUrl);
 	    cede;
 	}
     };
