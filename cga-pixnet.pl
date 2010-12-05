@@ -55,6 +55,8 @@ sub grubAlbum {
 }
 
 sub grubUser {
+    use vars qw/$userQueue/;
+
     my $username = shift;
 
     my $ua = genUA();
