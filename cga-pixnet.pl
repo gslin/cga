@@ -71,8 +71,38 @@ sub grubUser {
 	my $body = $res->content;
 	DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
 
-	last;
+	last if $body eq '';
+	# XXX HACK
+	last if length $body < 100;
+
+	my $html = HTML::TreeBuilder->new_from_content($body);
+	my $htmlD = Object::Destroyer->new($html, 'delete');
+
+	my $lastUsername;
+	foreach my $row ($html->look_down('class', 'row')) {
+	    my $rowD = Object::Destroyer->new($row, 'delete');
+
+	    $lastUsername = lc $row->attr('friendname');
+	    $userQueue->put($lastUsername);
+	}
+
+	$url = $url->new_abs("/friend/listmore?after=$lastUsername", $url);
     }
+
+    # 相本部份
+
+    my $ua = genUA();
+    my $url = URI->new(APIBASE . "/album/sets?format=json&user=$username&per_page=9999");
+    my $res = $ua->get($url);
+    DEBUG sprintf "Receiving %s code %d", $url, $res->code;
+
+    return if !$res->is_success;
+    my $body = $res->content;
+    DEBUG sprintf 'Receiving %s for %d bytes', $url, length $body;
+
+    my $p = decode_json($body);
+
+    # FIXME
 }
 
 sub grubWorker {
