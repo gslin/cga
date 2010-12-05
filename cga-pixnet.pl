@@ -60,7 +60,7 @@ sub grubUser {
     my $username = shift;
 
     my $ua = genUA();
-    my $url = "http://$username.pixnet.net.nyud.net/friend/list";
+    my $url = URI->new("http://$username.pixnet.net.nyud.net/friend/listmore");
 
     for (;;) {
 	my $res = $ua->get($url);
