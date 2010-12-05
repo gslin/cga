@@ -104,33 +104,35 @@ sub grubUser {
 sub grubWorker {
     use vars qw/$albumQueue $userQueue/;
 
-    async {
-	for (;;) {
-	    my $username = $userQueue->get or return;
-	    $username = lc $username;
+    foreach (0, 1) {
+	async {
+	    for (;;) {
+		my $username = $userQueue->get or return;
+		$username = lc $username;
 
-	    my $url = SITEBASE . "/album/$username";
-	    DEBUG sprintf 'userQueue working %s (%d available)', $username, $userQueue->length;
+		my $url = SITEBASE . "/album/$username";
+		DEBUG sprintf 'userQueue working %s (%d available)', $username, $userQueue->length;
 
-	    $userQueue->reput($username) if 0 > grubUser($url);
-	    cede;
-	}
-    };
-
-    async {
-	for (;;) {
-	    my $albumUrl = $albumQueue->get;
-	    if (!defined $albumUrl) {
-		sleep 1;
-		next;
+		$userQueue->reput($username) if 0 > grubUser($url);
+		cede;
 	    }
+	};
 
-	    DEBUG sprintf 'albumQueue working on %s (%d available)', $albumUrl, $albumQueue->length;
+	async {
+	    for (;;) {
+		my $albumUrl = $albumQueue->get;
+		if (!defined $albumUrl) {
+		    sleep 1;
+		    next;
+		}
 
-	    $albumQueue->reput($albumUrl) if 0 > grubAlbum($albumUrl);
-	    cede;
-	}
-    };
+		DEBUG sprintf 'albumQueue working on %s (%d available)', $albumUrl, $albumQueue->length;
+
+		$albumQueue->reput($albumUrl) if 0 > grubAlbum($albumUrl);
+		cede;
+	    }
+	};
+    }
 }
 
 sub initParams {
