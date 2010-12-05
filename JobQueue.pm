@@ -53,4 +53,12 @@ sub put {
     push @{$self->{jqa}}, "$id";
 }
 
+sub reput {
+    my $self = shift;
+    my $id = shift;
+
+    $self->{jq}->{$id} = 0;
+    push @{$self->{jqa}}, "$id";
+}
+
 1;
