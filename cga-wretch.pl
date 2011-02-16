@@ -81,6 +81,7 @@ sub grubUser {
 	my $res = $ua->get($url);
 	DEBUG sprintf "Receiving %s code %d", $url, $res->code;
 
+	return 0 if 404 == $res->code;
 	return -1 if !$res->is_success;
 
 	my $body = $res->content;
